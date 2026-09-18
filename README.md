@@ -16,7 +16,7 @@ uv add ld_json_extractor
 
 ```python
 from selectolax.lexbor import LexborHTMLParser
-from ld_json_extractor import ld_json_iter
+from ld_json_extractor import json_iter
 
 html_content = """
 <!DOCTYPE html>
@@ -34,7 +34,7 @@ html_content = """
 
 parser = LexborHTMLParser(html_content)
 
-for data in ld_json_iter(parser):
+for data in json_iter(parser, script_type="application/ld+json"):
     print(data)
 ```
 

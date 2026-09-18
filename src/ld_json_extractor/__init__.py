@@ -1,1 +1,1 @@
-from ._ld_json import find_ld_json, ld_json_iter
+from ._ld_json import find_ld_json, json_iter

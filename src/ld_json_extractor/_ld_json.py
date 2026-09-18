@@ -1,7 +1,6 @@
 import json
 import logging
 from collections.abc import Iterator
-from pathlib import Path
 
 from selectolax.lexbor import LexborHTMLParser
 
@@ -24,8 +23,11 @@ def _fix_unescaped_newlines(content: str) -> str:
     return "".join(result)
 
 
-def ld_json_iter(parser: LexborHTMLParser) -> Iterator[dict | list]:
-    for script_el in parser.css("script[type='application/ld+json']"):
+def json_iter(
+    parser: LexborHTMLParser,
+    script_type: str,
+) -> Iterator[dict | list]:
+    for script_el in parser.css(f"script[type='{script_type}']"):
         text = script_el.text()
         try:
             yield json.loads(text)
@@ -38,7 +40,7 @@ def ld_json_iter(parser: LexborHTMLParser) -> Iterator[dict | list]:
 
 
 def find_ld_json(type_: str, parser: LexborHTMLParser) -> dict | None:
-    for data in ld_json_iter(parser):
+    for data in json_iter(parser, script_type="application/ld+json"):
         if isinstance(data, list):
             for item in data:
                 if isinstance(item, dict) and item.get("@type") == type_:

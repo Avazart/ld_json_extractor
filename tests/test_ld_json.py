@@ -1,6 +1,6 @@
 from selectolax.lexbor import LexborHTMLParser
 
-from ld_json_extractor import find_ld_json, ld_json_iter
+from ld_json_extractor import find_ld_json, json_iter
 
 
 def test_ld_json_iter_parses_valid_and_repaired_json() -> None:
@@ -26,7 +26,7 @@ def test_ld_json_iter_parses_valid_and_repaired_json() -> None:
     </html>
     """
     parser = LexborHTMLParser(html)
-    results = list(ld_json_iter(parser))
+    results = list(json_iter(parser, "application/ld+json"))
 
     assert len(results) == 2
     assert results[0] == {"@type": "Organization", "name": "Company"}
