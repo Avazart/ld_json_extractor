@@ -1,46 +1,32 @@
 import json
 import logging
 from collections.abc import Iterator
+from types import NoneType
 
 from selectolax.lexbor import LexborHTMLParser
 
 logger = logging.getLogger("ld_json_extractor")
 
-def _fix_unescaped_newlines(content: str) -> str:
-    result: list[str] = []
-    in_string = False
-    escape = False
+Json = dict | list | int | float | str | NoneType
 
-    for ch in content:
-        if ch == '"' and not escape:
-            in_string = not in_string
-        if ch == "\n" and in_string:
-            result.append("\\n")
-            continue
-        result.append(ch)
-        escape = ch == "\\" and not escape
-
-    return "".join(result)
+LD_JSON_MIME = "application/ld+json"
+APP_JSON_MIME = "application/json"
 
 
-def json_iter(
-    parser: LexborHTMLParser,
-    script_type: str,
-) -> Iterator[dict | list]:
-    for script_el in parser.css(f"script[type='{script_type}']"):
-        text = script_el.text()
+def json_iter(parser: LexborHTMLParser, script_type: str) -> Iterator[Json]:
+    for script_el in parser.css(f'script[type="{script_type}"]'):
         try:
-            yield json.loads(text)
-        except json.JSONDecodeError:
-            try:
-                yield json.loads(_fix_unescaped_newlines(text))
-            except json.JSONDecodeError as e:
-                logger.debug("%s %s", type(e), e)
-                continue
+            yield json.loads(script_el.text(), strict=False)
+        except json.JSONDecodeError as e:
+            logger.debug(
+                "Skipping invalid JSON in <script type=%r>: %s", script_type, e
+            )
+            continue
+    return None
 
 
 def find_ld_json(type_: str, parser: LexborHTMLParser) -> dict | None:
-    for data in json_iter(parser, script_type="application/ld+json"):
+    for data in json_iter(parser, script_type=LD_JSON_MIME):
         if isinstance(data, list):
             for item in data:
                 if isinstance(item, dict) and item.get("@type") == type_:

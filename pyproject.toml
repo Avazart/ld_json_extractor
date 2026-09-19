@@ -1,6 +1,6 @@
 [project]
 name = "ld_json_extractor"
-version = "0.1.6"
+version = "0.1.7"
 description = "Extract ld+json from HTML"
 readme = "README.md"
 authors = [

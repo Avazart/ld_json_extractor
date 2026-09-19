@@ -36,6 +36,24 @@ def test_ld_json_iter_parses_valid_and_repaired_json() -> None:
     }
 
 
+def test_find_ld_json_accepts_unescaped_newline_in_string() -> None:
+    html = """
+    <script type="application/ld+json">
+        [
+            {
+               "@type": "Product", 
+               "name": "Item from
+                        array"
+             }
+        ]
+    </script>
+    """
+    parser = LexborHTMLParser(html)
+    product = find_ld_json("Product", parser)
+    assert product is not None
+    assert " ".join(product["name"].split()) == "Item from array"
+
+
 def test_find_ld_json_handles_dicts_and_array_lists() -> None:
     html = """
     <script type="application/ld+json">
